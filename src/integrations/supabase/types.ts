@@ -14,7 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          battles: number
+          best_reps: number
+          created_at: string
+          id: string
+          total_xp: number
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          battles?: number
+          best_reps?: number
+          created_at?: string
+          id: string
+          total_xp?: number
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          battles?: number
+          best_reps?: number
+          created_at?: string
+          id?: string
+          total_xp?: number
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      pushup_records: {
+        Row: {
+          created_at: string
+          duration_seconds: number
+          id: string
+          reps: number
+          source: string
+          user_id: string
+          xp_earned: number
+        }
+        Insert: {
+          created_at?: string
+          duration_seconds?: number
+          id?: string
+          reps: number
+          source?: string
+          user_id: string
+          xp_earned?: number
+        }
+        Update: {
+          created_at?: string
+          duration_seconds?: number
+          id?: string
+          reps?: number
+          source?: string
+          user_id?: string
+          xp_earned?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
