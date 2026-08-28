@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedBattleRouteImport } from './routes/_authenticated/battle'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
+import { Route as AuthenticatedResultsRouteImport } from './routes/_authenticated/results'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -39,18 +40,25 @@ const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
   path: '/home',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedResultsRoute = AuthenticatedResultsRouteImport.update({
+  id: '/results',
+  path: '/results',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/battle': typeof AuthenticatedBattleRoute
   '/home': typeof AuthenticatedHomeRoute
+  '/results': typeof AuthenticatedResultsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/battle': typeof AuthenticatedBattleRoute
   '/home': typeof AuthenticatedHomeRoute
+  '/results': typeof AuthenticatedResultsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -59,12 +67,13 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/battle': typeof AuthenticatedBattleRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
+  '/_authenticated/results': typeof AuthenticatedResultsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/battle' | '/home'
+  fullPaths: '/' | '/auth' | '/battle' | '/home' | '/results'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/battle' | '/home'
+  to: '/' | '/auth' | '/battle' | '/home' | '/results'
   id:
     | '__root__'
     | '/'
@@ -72,6 +81,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/battle'
     | '/_authenticated/home'
+    | '/_authenticated/results'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -117,17 +127,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedHomeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/results': {
+      id: '/_authenticated/results'
+      path: '/results'
+      fullPath: '/results'
+      preLoaderRoute: typeof AuthenticatedResultsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedBattleRoute: typeof AuthenticatedBattleRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
+  AuthenticatedResultsRoute: typeof AuthenticatedResultsRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedBattleRoute: AuthenticatedBattleRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
+  AuthenticatedResultsRoute: AuthenticatedResultsRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
