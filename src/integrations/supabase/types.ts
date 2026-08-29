@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      challenges: {
+        Row: {
+          challenger_done: boolean
+          challenger_id: string
+          challenger_reps: number
+          created_at: string
+          duration_seconds: number
+          id: string
+          opponent_done: boolean
+          opponent_id: string
+          opponent_reps: number
+          started_at: string | null
+          status: string
+          updated_at: string
+          winner_id: string | null
+        }
+        Insert: {
+          challenger_done?: boolean
+          challenger_id: string
+          challenger_reps?: number
+          created_at?: string
+          duration_seconds?: number
+          id?: string
+          opponent_done?: boolean
+          opponent_id: string
+          opponent_reps?: number
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          winner_id?: string | null
+        }
+        Update: {
+          challenger_done?: boolean
+          challenger_id?: string
+          challenger_reps?: number
+          created_at?: string
+          duration_seconds?: number
+          id?: string
+          opponent_done?: boolean
+          opponent_id?: string
+          opponent_reps?: number
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          winner_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           battles: number
