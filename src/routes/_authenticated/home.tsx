@@ -62,6 +62,14 @@ function HomePage() {
         Start Battle
       </Link>
 
+      <Link
+        to="/challenges"
+        className="mt-3 flex h-14 items-center justify-center rounded-xl border border-primary/40 bg-card font-display text-sm uppercase tracking-widest text-primary active:scale-[0.98]"
+      >
+        Challenge a fighter
+      </Link>
+
+
       <section className="panel mt-6 flex items-center gap-4 p-4">
         <div className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-accent">
           <Target className="h-5 w-5 text-primary" />
