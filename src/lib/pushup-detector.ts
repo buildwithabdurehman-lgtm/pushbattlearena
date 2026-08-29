@@ -129,19 +129,20 @@ export class PushupDetector {
     if (!leftArm && !rightArm) return base;
 
     const angles: number[] = [];
-    if (leftArm) angles.push(angleAt(ls, le, lw));
-    if (rightArm) angles.push(angleAt(rs, re, rw));
+    if (leftArm) angles.push(angleAt(ls!, le!, lw!));
+    if (rightArm) angles.push(angleAt(rs!, re!, rw!));
     const elbowAngle = angles.reduce((s, v) => s + v, 0) / angles.length;
 
     // Hip-sag / pike check: shoulder-hip-knee should stay close to a line.
     let bodyAngle: number | null = null;
     if (visible(ls, lh, lk) && visible(rs, rh, rk)) {
-      bodyAngle = avg(angleAt(ls, lh, lk), angleAt(rs, rh, rk));
+      bodyAngle = avg(angleAt(ls!, lh!, lk!), angleAt(rs!, rh!, rk!));
     } else if (visible(ls, lh, lk)) {
-      bodyAngle = angleAt(ls, lh, lk);
+      bodyAngle = angleAt(ls!, lh!, lk!);
     } else if (visible(rs, rh, rk)) {
-      bodyAngle = angleAt(rs, rh, rk);
+      bodyAngle = angleAt(rs!, rh!, rk!);
     }
+
 
     const depth = Math.round(
       Math.min(100, Math.max(0, ((UP_ANGLE - elbowAngle) / (UP_ANGLE - DOWN_ANGLE)) * 100)),
