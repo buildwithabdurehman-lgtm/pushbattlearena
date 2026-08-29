@@ -11,6 +11,7 @@ import {
   type Challenge,
 } from "@/hooks/use-challenges";
 import { RankBadge } from "@/components/RankBadge";
+import { rankForXp } from "@/lib/game";
 
 export const Route = createFileRoute("/_authenticated/challenges")({
   head: () => ({
@@ -194,7 +195,7 @@ function ChallengesPage() {
               className="flex items-center justify-between rounded-lg border border-border bg-background px-3 py-2"
             >
               <div className="flex items-center gap-3">
-                <RankBadge totalXp={p.total_xp} size="sm" />
+                <RankBadge rank={rankForXp(p.total_xp)} size="sm" />
                 <div>
                   <p className="font-display text-sm uppercase tracking-wide">{p.username}</p>
                   <p className="num-display text-[10px] text-muted-foreground">
