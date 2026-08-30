@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { LogOut } from "lucide-react";
+import { Camera, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/use-session";
@@ -9,6 +9,33 @@ import { useProfile, useRecords } from "@/hooks/use-profile";
 import { formatClock, rankProgress } from "@/lib/game";
 import { RankBadge } from "@/components/RankBadge";
 import { XpBar } from "@/components/XpBar";
+import { FighterAvatar } from "@/components/FighterAvatar";
+
+const AVATAR_SIZE = 256;
+
+/** Square-crops and shrinks the picked photo so it stays small enough to store. */
+async function toSquareDataUrl(file: File): Promise<string> {
+  const bitmap = await createImageBitmap(file);
+  const side = Math.min(bitmap.width, bitmap.height);
+  const canvas = document.createElement("canvas");
+  canvas.width = AVATAR_SIZE;
+  canvas.height = AVATAR_SIZE;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas unavailable");
+  ctx.drawImage(
+    bitmap,
+    (bitmap.width - side) / 2,
+    (bitmap.height - side) / 2,
+    side,
+    side,
+    0,
+    0,
+    AVATAR_SIZE,
+    AVATAR_SIZE,
+  );
+  bitmap.close();
+  return canvas.toDataURL("image/jpeg", 0.82);
+}
 
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({
@@ -28,6 +55,8 @@ function ProfilePage() {
   const { data: records } = useRecords(user?.id, 10);
   const [username, setUsername] = useState("");
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInput = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { rank, next, percent, xpNeeded } = rankProgress(profile?.total_xp ?? 0);
@@ -52,6 +81,26 @@ function ProfilePage() {
     toast.success("Fighter name updated");
   }
 
+  async function pickPhoto(file: File | undefined) {
+    if (!file || !user) return;
+    setUploading(true);
+    try {
+      const dataUrl = await toSquareDataUrl(file);
+      const { error } = await supabase
+        .from("profiles")
+        .update({ avatar_url: dataUrl })
+        .eq("id", user.id);
+      if (error) throw error;
+      await queryClient.invalidateQueries();
+      toast.success("Profile picture updated");
+    } catch {
+      toast.error("Could not update your picture");
+    } finally {
+      setUploading(false);
+      if (fileInput.current) fileInput.current.value = "";
+    }
+  }
+
   async function signOut() {
     await queryClient.cancelQueries();
     queryClient.clear();
@@ -64,7 +113,30 @@ function ProfilePage() {
       <h1 className="text-3xl">Profile</h1>
 
       <section className="panel mt-6 flex items-center gap-4 p-4">
-        <RankBadge rank={rank} size="lg" />
+        <div className="relative">
+          <FighterAvatar
+            url={profile?.avatar_url}
+            name={profile?.username}
+            className="h-20 w-20"
+          />
+          <RankBadge rank={rank} size="sm" className="absolute -bottom-1 -left-1 h-8 w-8" />
+          <button
+            onClick={() => fileInput.current?.click()}
+            disabled={uploading}
+            aria-label="Change profile picture"
+            className="absolute -bottom-1 -right-1 grid h-8 w-8 place-items-center rounded-full bg-primary text-primary-foreground glow-red active:scale-95 disabled:opacity-60"
+          >
+            <Camera className="h-4 w-4" />
+          </button>
+          <input
+            ref={fileInput}
+            type="file"
+            accept="image/*"
+            capture="user"
+            className="hidden"
+            onChange={(event) => void pickPhoto(event.target.files?.[0])}
+          />
+        </div>
         <div className="min-w-0 flex-1">
           <p className="truncate text-xl font-display uppercase">{profile?.username ?? "…"}</p>
           <p className="text-xs font-semibold uppercase tracking-widest text-primary">{rank.name}</p>
