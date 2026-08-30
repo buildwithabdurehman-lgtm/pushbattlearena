@@ -16,14 +16,16 @@ export type Database = {
     Tables: {
       challenges: {
         Row: {
+          bot_name: string | null
           challenger_done: boolean
           challenger_id: string
           challenger_reps: number
           created_at: string
           duration_seconds: number
           id: string
+          is_bot: boolean
           opponent_done: boolean
-          opponent_id: string
+          opponent_id: string | null
           opponent_reps: number
           started_at: string | null
           status: string
@@ -31,14 +33,16 @@ export type Database = {
           winner_id: string | null
         }
         Insert: {
+          bot_name?: string | null
           challenger_done?: boolean
           challenger_id: string
           challenger_reps?: number
           created_at?: string
           duration_seconds?: number
           id?: string
+          is_bot?: boolean
           opponent_done?: boolean
-          opponent_id: string
+          opponent_id?: string | null
           opponent_reps?: number
           started_at?: string | null
           status?: string
@@ -46,14 +50,16 @@ export type Database = {
           winner_id?: string | null
         }
         Update: {
+          bot_name?: string | null
           challenger_done?: boolean
           challenger_id?: string
           challenger_reps?: number
           created_at?: string
           duration_seconds?: number
           id?: string
+          is_bot?: boolean
           opponent_done?: boolean
-          opponent_id?: string
+          opponent_id?: string | null
           opponent_reps?: number
           started_at?: string | null
           status?: string
@@ -64,28 +70,34 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
           battles: number
           best_reps: number
           created_at: string
           id: string
+          last_seen_at: string
           total_xp: number
           updated_at: string
           username: string
         }
         Insert: {
+          avatar_url?: string | null
           battles?: number
           best_reps?: number
           created_at?: string
           id: string
+          last_seen_at?: string
           total_xp?: number
           updated_at?: string
           username: string
         }
         Update: {
+          avatar_url?: string | null
           battles?: number
           best_reps?: number
           created_at?: string
           id?: string
+          last_seen_at?: string
           total_xp?: number
           updated_at?: string
           username?: string
@@ -127,7 +139,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      touch_last_seen: { Args: never; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
