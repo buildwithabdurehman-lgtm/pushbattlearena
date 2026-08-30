@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 export type Challenge = {
   id: string;
   challenger_id: string;
-  opponent_id: string;
+  opponent_id: string | null;
   duration_seconds: number;
   status: "pending" | "active" | "finished" | "declined";
   challenger_reps: number;
@@ -120,6 +120,25 @@ export function useProfilesByIds(ids: string[]) {
         .in("id", ids);
       if (error) throw error;
       return data ?? [];
+    },
+  });
+}
+
+/** Fighters seen in the last 2 minutes, for random matchmaking. */
+export function useOnlineCount(userId: string | undefined) {
+  return useQuery({
+    queryKey: ["online-count", userId],
+    enabled: Boolean(userId),
+    refetchInterval: 20_000,
+    queryFn: async () => {
+      const since = new Date(Date.now() - 2 * 60_000).toISOString();
+      const { count, error } = await supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .neq("id", userId!)
+        .gt("last_seen_at", since);
+      if (error) throw error;
+      return count ?? 0;
     },
   });
 }
