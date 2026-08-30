@@ -139,7 +139,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      touch_last_seen: { Args: never; Returns: undefined }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never
