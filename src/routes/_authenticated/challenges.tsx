@@ -1,15 +1,18 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Swords, Check, X, Timer } from "lucide-react";
+import { Swords, Check, X, Timer, Zap, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/use-session";
 import {
   useMyChallenges,
+  useOnlineCount,
   useOpponents,
   useProfilesByIds,
   type Challenge,
 } from "@/hooks/use-challenges";
+import { findRandomMatch } from "@/lib/matchmaking";
+import { FighterAvatar } from "@/components/FighterAvatar";
 import { RankBadge } from "@/components/RankBadge";
 import { rankForXp } from "@/lib/game";
 
@@ -43,17 +46,43 @@ function ChallengesPage() {
   const { data: opponents = [] } = useOpponents(user?.id);
   const [duration, setDuration] = useState<number>(60);
   const [busy, setBusy] = useState<string | null>(null);
+  const [searching, setSearching] = useState(false);
+  const { data: onlineCount = 0 } = useOnlineCount(user?.id);
 
   const ids = Array.from(
-    new Set(challenges.flatMap((c) => [c.challenger_id, c.opponent_id])),
+    new Set(
+      challenges.flatMap((c) =>
+        [c.challenger_id, c.opponent_id].filter((id): id is string => Boolean(id)),
+      ),
+    ),
   ).filter((id) => id !== user?.id);
   const { data: others = [] } = useProfilesByIds(ids);
-  const nameFor = (id: string) => others.find((p) => p.id === id)?.username ?? "Fighter";
+  const avatarFor = (id: string | null) =>
+    id ? (others.find((p) => p.id === id)?.avatar_url ?? null) : null;
+  const nameFor = (id: string | null) => id ? (others.find((p) => p.id === id)?.username ?? "Fighter") : "Fighter";
 
   const incoming = challenges.filter((c) => c.status === "pending" && c.opponent_id === user?.id);
   const outgoing = challenges.filter((c) => c.status === "pending" && c.challenger_id === user?.id);
   const active = challenges.filter((c) => c.status === "active");
   const history = challenges.filter((c) => c.status === "finished").slice(0, 8);
+
+  async function quickMatch() {
+    if (!user) return;
+    setSearching(true);
+    try {
+      const match = await findRandomMatch(user.id, duration);
+      toast.success(
+        match.vsBot
+          ? `No one online — you're facing ${match.opponentName}`
+          : `Matched with ${match.opponentName}`,
+      );
+      void navigate({ to: "/duel/$challengeId", params: { challengeId: match.challengeId } });
+    } catch {
+      toast.error("Matchmaking failed — try again");
+    } finally {
+      setSearching(false);
+    }
+  }
 
   async function sendChallenge(opponentId: string) {
     if (!user) return;
@@ -98,19 +127,68 @@ function ChallengesPage() {
         </p>
       </header>
 
+      <section className="panel mt-5 p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-sm uppercase tracking-widest text-primary">Quick match</h2>
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+              {onlineCount > 0
+                ? `${onlineCount} fighter${onlineCount === 1 ? "" : "s"} online`
+                : "No one online — you'll face a bot"}
+            </p>
+          </div>
+          <div className="flex gap-1">
+            {DURATIONS.map((value) => (
+              <button
+                key={value}
+                onClick={() => setDuration(value)}
+                className={`rounded-md px-2 py-1 font-display text-[10px] uppercase tracking-widest ${
+                  duration === value
+                    ? "bg-primary text-primary-foreground"
+                    : "border border-border text-muted-foreground"
+                }`}
+              >
+                {value}s
+              </button>
+            ))}
+          </div>
+        </div>
+        <button
+          onClick={() => void quickMatch()}
+          disabled={searching}
+          className="mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-primary font-display text-sm uppercase tracking-widest text-primary-foreground glow-red active:scale-95 disabled:opacity-60"
+        >
+          {searching ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" /> Finding opponent
+            </>
+          ) : (
+            <>
+              <Zap className="h-4 w-4" /> Find a fighter
+            </>
+          )}
+        </button>
+      </section>
+
       {incoming.length > 0 && (
         <section className="panel mt-5 p-4">
           <h2 className="text-sm uppercase tracking-widest text-primary">Incoming</h2>
           <ul className="mt-3 space-y-3">
             {incoming.map((c) => (
               <li key={c.id} className="flex items-center justify-between gap-3">
-                <div>
+                <div className="flex items-center gap-3">
+                  <FighterAvatar
+                    url={avatarFor(c.challenger_id)}
+                    name={nameFor(c.challenger_id)}
+                  />
+                  <div>
                   <p className="font-display text-sm uppercase tracking-wide">
                     {nameFor(c.challenger_id)}
                   </p>
                   <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
                     {c.duration_seconds}s match
                   </p>
+                  </div>
                 </div>
                 <div className="flex gap-2">
                   <button
@@ -151,7 +229,7 @@ function ChallengesPage() {
                     className="flex w-full items-center justify-between rounded-lg border border-border bg-background px-3 py-3 active:scale-[0.98]"
                   >
                     <span className="font-display text-sm uppercase tracking-wide">
-                      vs {nameFor(foe)}
+                      vs {c.is_bot ? (c.bot_name ?? "Bot") : nameFor(foe)}
                     </span>
                     <span className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-primary">
                       <Timer className="h-3.5 w-3.5" /> Enter
@@ -195,6 +273,7 @@ function ChallengesPage() {
               className="flex items-center justify-between rounded-lg border border-border bg-background px-3 py-2"
             >
               <div className="flex items-center gap-3">
+                <FighterAvatar url={p.avatar_url} name={p.username} />
                 <RankBadge rank={rankForXp(p.total_xp)} size="sm" />
                 <div>
                   <p className="font-display text-sm uppercase tracking-wide">{p.username}</p>
@@ -240,7 +319,9 @@ function ChallengesPage() {
                 c.winner_id === null ? "Draw" : c.winner_id === user?.id ? "Win" : "Loss";
               return (
                 <li key={c.id} className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">vs {nameFor(foe)}</span>
+                  <span className="text-muted-foreground">
+                    vs {c.is_bot ? (c.bot_name ?? "Bot") : nameFor(foe)}
+                  </span>
                   <span className="num-display">
                     {mine}–{theirs}
                   </span>

@@ -4,6 +4,7 @@ import { useSession } from "@/hooks/use-session";
 import { useLeaderboard } from "@/hooks/use-profile";
 import { rankForXp } from "@/lib/game";
 import { RankBadge } from "@/components/RankBadge";
+import { FighterAvatar } from "@/components/FighterAvatar";
 
 export const Route = createFileRoute("/_authenticated/leaderboard")({
   head: () => ({
@@ -40,6 +41,7 @@ function LeaderboardPage() {
               className={`flex items-center gap-3 px-4 py-3 ${isMe ? "bg-accent" : ""}`}
             >
               <span className="num-display w-6 text-base text-muted-foreground">{index + 1}</span>
+              <FighterAvatar url={entry.avatar_url} name={entry.username} className="h-9 w-9" />
               {index === 0 ? (
                 <Trophy className="h-5 w-5 shrink-0 text-gold" />
               ) : (

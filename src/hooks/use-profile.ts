@@ -7,6 +7,7 @@ export type Profile = {
   total_xp: number;
   best_reps: number;
   battles: number;
+  avatar_url: string | null;
 };
 
 export function profileQueryKey(userId: string | undefined) {
@@ -20,7 +21,7 @@ export function useProfile(userId: string | undefined) {
     queryFn: async (): Promise<Profile | null> => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, username, total_xp, best_reps, battles")
+        .select("id, username, total_xp, best_reps, battles, avatar_url")
         .eq("id", userId!)
         .maybeSingle();
       if (error) throw error;
@@ -35,7 +36,7 @@ export function useLeaderboard(limit = 25) {
     queryFn: async (): Promise<Profile[]> => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, username, total_xp, best_reps, battles")
+        .select("id, username, total_xp, best_reps, battles, avatar_url")
         .order("total_xp", { ascending: false })
         .order("best_reps", { ascending: false })
         .limit(limit);

@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 export type Challenge = {
   id: string;
   challenger_id: string;
-  opponent_id: string;
+  opponent_id: string | null;
   duration_seconds: number;
   status: "pending" | "active" | "finished" | "declined";
   challenger_reps: number;
@@ -15,10 +15,12 @@ export type Challenge = {
   winner_id: string | null;
   started_at: string | null;
   created_at: string;
+  is_bot: boolean;
+  bot_name: string | null;
 };
 
 const SELECT =
-  "id, challenger_id, opponent_id, duration_seconds, status, challenger_reps, opponent_reps, challenger_done, opponent_done, winner_id, started_at, created_at";
+  "id, challenger_id, opponent_id, duration_seconds, status, challenger_reps, opponent_reps, challenger_done, opponent_done, winner_id, started_at, created_at, is_bot, bot_name";
 
 export function useMyChallenges(userId: string | undefined) {
   const queryClient = useQueryClient();
@@ -96,7 +98,7 @@ export function useOpponents(userId: string | undefined) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, username, total_xp, best_reps, battles")
+        .select("id, username, total_xp, best_reps, battles, avatar_url")
         .neq("id", userId!)
         .order("total_xp", { ascending: false })
         .limit(30);
@@ -114,10 +116,29 @@ export function useProfilesByIds(ids: string[]) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, username, total_xp, best_reps, battles")
+        .select("id, username, total_xp, best_reps, battles, avatar_url")
         .in("id", ids);
       if (error) throw error;
       return data ?? [];
+    },
+  });
+}
+
+/** Fighters seen in the last 2 minutes, for random matchmaking. */
+export function useOnlineCount(userId: string | undefined) {
+  return useQuery({
+    queryKey: ["online-count", userId],
+    enabled: Boolean(userId),
+    refetchInterval: 20_000,
+    queryFn: async () => {
+      const since = new Date(Date.now() - 2 * 60_000).toISOString();
+      const { count, error } = await supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .neq("id", userId!)
+        .gt("last_seen_at", since);
+      if (error) throw error;
+      return count ?? 0;
     },
   });
 }
