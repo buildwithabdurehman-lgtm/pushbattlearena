@@ -50,7 +50,11 @@ function ChallengesPage() {
   const { data: onlineCount = 0 } = useOnlineCount(user?.id);
 
   const ids = Array.from(
-    new Set(challenges.flatMap((c) => [c.challenger_id, c.opponent_id])),
+    new Set(
+      challenges.flatMap((c) =>
+        [c.challenger_id, c.opponent_id].filter((id): id is string => Boolean(id)),
+      ),
+    ),
   ).filter((id) => id !== user?.id);
   const { data: others = [] } = useProfilesByIds(ids);
   const avatarFor = (id: string | null) =>

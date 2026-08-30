@@ -12,7 +12,7 @@ const BOT_NAMES = [
 ];
 
 export function randomBotName() {
-  return BOT_NAMES[Math.floor(Math.random() * BOT_NAMES.length)];
+  return BOT_NAMES[Math.floor(Math.random() * BOT_NAMES.length)] ?? "Iron-Bot";
 }
 
 export type MatchResult = { challengeId: string; vsBot: boolean; opponentName: string };
@@ -35,7 +35,7 @@ export async function findRandomMatch(
   if (onlineError) throw onlineError;
 
   const pool = online ?? [];
-  const pick = pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : null;
+  const pick = pool.length > 0 ? (pool[Math.floor(Math.random() * pool.length)] ?? null) : null;
   const botName = randomBotName();
 
   const { data, error } = await supabase

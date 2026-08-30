@@ -2,10 +2,10 @@ import { Bot } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Props = {
-  url?: string | null;
-  name?: string | null;
-  isBot?: boolean;
-  className?: string;
+  url?: string | null | undefined;
+  name?: string | null | undefined;
+  isBot?: boolean | undefined;
+  className?: string | undefined;
 };
 
 /** Round fighter portrait with an initials fallback. */
