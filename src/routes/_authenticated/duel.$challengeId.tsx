@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/use-session";
 import { useChallenge, useProfilesByIds } from "@/hooks/use-challenges";
+import { FighterAvatar } from "@/components/FighterAvatar";
 import { formatClock, xpForReps } from "@/lib/game";
 import type { DetectorFrame } from "@/lib/pushup-detector";
 
@@ -42,6 +43,8 @@ function DuelPage() {
   const [remaining, setRemaining] = useState<number | null>(null);
   const [running, setRunning] = useState(false);
   const [frame, setFrame] = useState<DetectorFrame | null>(null);
+  const [botReps, setBotReps] = useState(0);
+  const botPace = useRef(0.8);
   const repsRef = useRef(0);
   const pushed = useRef(0);
   const finishedRef = useRef(false);
@@ -55,10 +58,17 @@ function DuelPage() {
     : 0;
   const iAmDone = challenge ? (isChallenger ? challenge.challenger_done : challenge.opponent_done) : false;
 
-  const ids = challenge ? [challenge.challenger_id, challenge.opponent_id] : [];
+  const vsBot = challenge?.is_bot ?? false;
+  const botName = challenge?.bot_name ?? "Bot";
+  const ids = challenge
+    ? [challenge.challenger_id, challenge.opponent_id].filter((id): id is string => Boolean(id))
+    : [];
   const { data: profiles = [] } = useProfilesByIds(ids);
-  const nameFor = (id: string | undefined) =>
+  const nameFor = (id: string | null | undefined) =>
     profiles.find((p) => p.id === id)?.username ?? "Fighter";
+  const avatarFor = (id: string | null | undefined) =>
+    profiles.find((p) => p.id === id)?.avatar_url ?? null;
+  const foeId = challenge ? (isChallenger ? challenge.opponent_id : challenge.challenger_id) : null;
 
   // Push my live rep count to the shared match row.
   const syncReps = useCallback(
@@ -76,6 +86,8 @@ function DuelPage() {
   const handleRep = useCallback(() => {
     repsRef.current += 1;
     setReps(repsRef.current);
+    // The bot always trails the player (loss) or matches exactly (draw).
+    setBotReps(Math.min(repsRef.current, Math.floor(repsRef.current * botPace.current)));
   }, []);
 
   // Throttle score writes to roughly one per second.
@@ -94,7 +106,23 @@ function DuelPage() {
     if (finishedRef.current) return;
     finishedRef.current = true;
     setRunning(false);
-    await syncReps(repsRef.current, true);
+    if (vsBot) {
+      const finalBot = Math.min(
+        repsRef.current,
+        Math.floor(repsRef.current * botPace.current),
+      );
+      setBotReps(finalBot);
+      const patch = {
+        challenger_reps: repsRef.current,
+        challenger_done: true,
+        opponent_reps: finalBot,
+        opponent_done: true,
+      };
+      const { error } = await supabase.from("challenges").update(patch).eq("id", challengeId);
+      if (error) toast.error("Score sync failed");
+    } else {
+      await syncReps(repsRef.current, true);
+    }
     if (user && repsRef.current > 0) {
       await supabase.from("pushup_records").insert({
         user_id: user.id,
@@ -104,7 +132,7 @@ function DuelPage() {
       });
     }
     await queryClient.invalidateQueries();
-  }, [challenge?.duration_seconds, queryClient, syncReps, user]);
+  }, [challenge?.duration_seconds, challengeId, queryClient, syncReps, user, vsBot]);
 
   // Match clock.
   useEffect(() => {
@@ -123,6 +151,9 @@ function DuelPage() {
     pushed.current = 0;
     finishedRef.current = false;
     setReps(0);
+    setBotReps(0);
+    // 1 in 4 bot matches ends in a draw, otherwise the bot falls behind.
+    botPace.current = Math.random() < 0.25 ? 1 : 0.6 + Math.random() * 0.25;
     setRemaining(challenge.duration_seconds);
     setRunning(true);
   }
@@ -136,7 +167,8 @@ function DuelPage() {
   }
 
   const matchOver = challenge.status === "finished";
-  const total = Math.max(1, myReps + reps + foeReps);
+  const shownFoeReps = vsBot ? Math.max(botReps, matchOver ? foeReps : 0) : foeReps;
+  const total = Math.max(1, myReps + reps + shownFoeReps);
   const myBar = Math.round((Math.max(myReps, reps) / total) * 100);
 
   return (
@@ -147,9 +179,14 @@ function DuelPage() {
           Ranked Match
         </p>
         <div className="mt-3 grid grid-cols-3 items-center">
-          <div className="text-left">
-            <p className="font-display text-sm uppercase tracking-wide">{nameFor(user?.id)}</p>
-            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">You</p>
+          <div className="flex items-center gap-2 text-left">
+            <FighterAvatar url={avatarFor(user?.id)} name={nameFor(user?.id)} />
+            <div className="min-w-0">
+              <p className="truncate font-display text-sm uppercase tracking-wide">
+                {nameFor(user?.id)}
+              </p>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">You</p>
+            </div>
           </div>
           <div className="text-center">
             <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Time</p>
@@ -157,11 +194,20 @@ function DuelPage() {
               {formatClock(remaining ?? challenge.duration_seconds)}
             </p>
           </div>
-          <div className="text-right">
-            <p className="font-display text-sm uppercase tracking-wide">
-              {nameFor(isChallenger ? challenge.opponent_id : challenge.challenger_id)}
-            </p>
-            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Opponent</p>
+          <div className="flex items-center justify-end gap-2 text-right">
+            <div className="min-w-0">
+              <p className="truncate font-display text-sm uppercase tracking-wide">
+                {vsBot ? botName : nameFor(foeId)}
+              </p>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                {vsBot ? "Bot" : "Opponent"}
+              </p>
+            </div>
+            <FighterAvatar
+              url={vsBot ? null : avatarFor(foeId)}
+              name={vsBot ? botName : nameFor(foeId)}
+              isBot={vsBot}
+            />
           </div>
         </div>
         <div className="mt-3 flex items-center gap-3">
@@ -173,7 +219,7 @@ function DuelPage() {
             />
             <div className="absolute inset-y-0 left-1/2 w-px bg-foreground/40" />
           </div>
-          <span className="num-display text-3xl">{foeReps}</span>
+          <span className="num-display text-3xl">{shownFoeReps}</span>
         </div>
       </section>
 
@@ -187,7 +233,7 @@ function DuelPage() {
                 : "Defeat"}
           </p>
           <p className="mt-2 num-display text-lg">
-            {myReps} – {foeReps}
+            {myReps} – {shownFoeReps}
           </p>
           <p className="mt-1 text-xs text-muted-foreground">+{xpForReps(myReps)} XP banked</p>
           <button
