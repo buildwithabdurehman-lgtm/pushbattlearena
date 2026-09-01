@@ -21,7 +21,7 @@ export function FighterAvatar({ url, name, isBot = false, className }: Props) {
   return (
     <span
       className={cn(
-        "grid shrink-0 place-items-center overflow-hidden rounded-full border border-primary/40 bg-card text-primary",
+        "grid shrink-0 place-items-center overflow-hidden rounded-full border border-primary/40 bg-card text-primary text-xs",
         "h-10 w-10",
         className,
       )}
@@ -36,7 +36,7 @@ export function FighterAvatar({ url, name, isBot = false, className }: Props) {
       ) : isBot ? (
         <Bot className="h-1/2 w-1/2" aria-hidden />
       ) : (
-        <span className="font-display text-xs uppercase tracking-wide">{initials || "?"}</span>
+        <span className="font-display uppercase tracking-wide">{initials || "?"}</span>
       )}
     </span>
   );

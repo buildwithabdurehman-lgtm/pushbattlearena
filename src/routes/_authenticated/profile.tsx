@@ -117,7 +117,7 @@ function ProfilePage() {
           <FighterAvatar
             url={profile?.avatar_url}
             name={profile?.username}
-            className="h-20 w-20"
+            className="h-20 w-20 text-2xl"
           />
           <button
             onClick={() => fileInput.current?.click()}
