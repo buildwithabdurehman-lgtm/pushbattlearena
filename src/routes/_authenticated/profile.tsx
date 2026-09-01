@@ -117,9 +117,8 @@ function ProfilePage() {
           <FighterAvatar
             url={profile?.avatar_url}
             name={profile?.username}
-            className="h-20 w-20"
+            className="h-20 w-20 text-2xl"
           />
-          <RankBadge rank={rank} size="sm" className="absolute -bottom-1 -left-1 h-8 w-8" />
           <button
             onClick={() => fileInput.current?.click()}
             disabled={uploading}
@@ -139,7 +138,12 @@ function ProfilePage() {
         </div>
         <div className="min-w-0 flex-1">
           <p className="truncate text-xl font-display uppercase">{profile?.username ?? "…"}</p>
-          <p className="text-xs font-semibold uppercase tracking-widest text-primary">{rank.name}</p>
+          <div className="mt-1 flex items-center gap-2">
+            <RankBadge rank={rank} size="sm" className="h-7 w-7" />
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+              {rank.name}
+            </p>
+          </div>
           <XpBar percent={percent} className="mt-3" height="h-2" />
           <p className="mt-1.5 text-[10px] text-muted-foreground">
             {next ? `${xpNeeded.toLocaleString()} XP to ${next.name}` : "Max rank reached"}
