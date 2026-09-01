@@ -9,21 +9,49 @@ export function xpForReps(reps: number): number {
   return Math.max(0, Math.floor(reps)) * XP_PER_REP;
 }
 
+/** Icon keys are mapped to a lucide icon inside RankBadge. */
+export type RankIcon =
+  | "dumbbell"
+  | "flame"
+  | "hammer"
+  | "medal"
+  | "shield"
+  | "swords"
+  | "zap"
+  | "award"
+  | "gem"
+  | "diamond"
+  | "skull"
+  | "star"
+  | "crown"
+  | "trophy"
+  | "sparkles";
+
 export type Rank = {
   name: string;
   minXp: number;
   tier: number;
+  icon: RankIcon;
+  /** Badge accent, expressed as an oklch token so it stays theme-consistent. */
+  accent: string;
 };
 
 export const RANKS: Rank[] = [
-  { name: "Rookie", minXp: 0, tier: 1 },
-  { name: "Grinder", minXp: 500, tier: 2 },
-  { name: "Contender", minXp: 1500, tier: 3 },
-  { name: "Challenger", minXp: 3000, tier: 4 },
-  { name: "Elite", minXp: 6000, tier: 5 },
-  { name: "Warlord", minXp: 10000, tier: 6 },
-  { name: "Champion", minXp: 18000, tier: 7 },
-  { name: "Legend", minXp: 30000, tier: 8 },
+  { name: "Rookie", minXp: 0, tier: 1, icon: "dumbbell", accent: "oklch(0.72 0.02 250)" },
+  { name: "Grinder", minXp: 400, tier: 2, icon: "flame", accent: "oklch(0.7 0.14 45)" },
+  { name: "Iron", minXp: 900, tier: 3, icon: "hammer", accent: "oklch(0.66 0.03 250)" },
+  { name: "Bronze", minXp: 1600, tier: 4, icon: "medal", accent: "oklch(0.68 0.12 55)" },
+  { name: "Steel", minXp: 2600, tier: 5, icon: "shield", accent: "oklch(0.76 0.03 220)" },
+  { name: "Silver", minXp: 4000, tier: 6, icon: "swords", accent: "oklch(0.85 0.01 240)" },
+  { name: "Contender", minXp: 6000, tier: 7, icon: "zap", accent: "oklch(0.78 0.16 95)" },
+  { name: "Gold", minXp: 8500, tier: 8, icon: "award", accent: "oklch(0.83 0.16 88)" },
+  { name: "Platinum", minXp: 12000, tier: 9, icon: "gem", accent: "oklch(0.86 0.08 190)" },
+  { name: "Diamond", minXp: 16000, tier: 10, icon: "diamond", accent: "oklch(0.82 0.13 215)" },
+  { name: "Warlord", minXp: 21000, tier: 11, icon: "skull", accent: "oklch(0.63 0.24 26.5)" },
+  { name: "Master", minXp: 27000, tier: 12, icon: "star", accent: "oklch(0.72 0.19 305)" },
+  { name: "Champion", minXp: 34000, tier: 13, icon: "crown", accent: "oklch(0.8 0.18 75)" },
+  { name: "Immortal", minXp: 45000, tier: 14, icon: "trophy", accent: "oklch(0.7 0.2 340)" },
+  { name: "Legend", minXp: 60000, tier: 15, icon: "sparkles", accent: "oklch(0.88 0.15 100)" },
 ];
 
 export function rankForXp(totalXp: number): Rank {
