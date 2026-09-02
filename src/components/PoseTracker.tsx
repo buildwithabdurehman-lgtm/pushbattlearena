@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { SwitchCamera } from "lucide-react";
 import { PushupDetector, POSE_CONNECTIONS, type DetectorFrame } from "@/lib/pushup-detector";
 
 type Props = {
@@ -26,6 +27,13 @@ export function PoseTracker({ counting, onRep, onFrame }: Props) {
   const onFrameRef = useRef(onFrame);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [message, setMessage] = useState("Loading pose engine…");
+  const [facing, setFacing] = useState<"environment" | "user">("environment");
+
+  const flipCamera = useCallback(() => {
+    setStatus("loading");
+    setMessage("Switching camera…");
+    setFacing((current) => (current === "environment" ? "user" : "environment"));
+  }, []);
 
   countingRef.current = counting;
   onRepRef.current = onRep;
@@ -51,7 +59,7 @@ export function PoseTracker({ counting, onRep, onFrame }: Props) {
 
         setMessage("Requesting camera…");
         stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
+          video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 720 } },
           audio: false,
         });
         if (cancelled) return;
@@ -109,7 +117,7 @@ export function PoseTracker({ counting, onRep, onFrame }: Props) {
       stream?.getTracks().forEach((track) => track.stop());
       landmarker?.close();
     };
-  }, []);
+  }, [facing]);
 
   return (
     <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl border border-border bg-black">
@@ -118,12 +126,23 @@ export function PoseTracker({ counting, onRep, onFrame }: Props) {
         playsInline
         muted
         className="absolute inset-0 h-full w-full object-cover"
+        style={facing === "user" ? { transform: "scaleX(-1)" } : undefined}
       />
       <canvas
         ref={canvasRef}
         className="absolute inset-0 h-full w-full object-cover"
+        style={facing === "user" ? { transform: "scaleX(-1)" } : undefined}
         aria-hidden
       />
+      <button
+        type="button"
+        onClick={flipCamera}
+        className="absolute right-3 top-3 z-10 flex items-center gap-1.5 rounded-full border border-border bg-card/85 px-3 py-2 font-display text-[10px] uppercase tracking-widest backdrop-blur active:scale-95"
+        aria-label="Switch between front and back camera"
+      >
+        <SwitchCamera className="h-4 w-4" />
+        {facing === "user" ? "Front" : "Back"}
+      </button>
       {status !== "ready" && (
         <div className="absolute inset-0 grid place-items-center bg-background/80 px-6 text-center">
           <p className="text-xs uppercase tracking-widest text-muted-foreground">{message}</p>
