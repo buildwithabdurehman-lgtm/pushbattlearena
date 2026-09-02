@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { VerifiedTick } from "@/components/VerifiedTick";
 import { Trophy } from "lucide-react";
 import { useSession } from "@/hooks/use-session";
 import { useLeaderboard } from "@/hooks/use-profile";
