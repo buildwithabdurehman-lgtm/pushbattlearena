@@ -98,7 +98,7 @@ export function useOpponents(userId: string | undefined) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, username, total_xp, best_reps, battles, avatar_url")
+        .select("id, username, total_xp, best_reps, battles, avatar_url, verified")
         .neq("id", userId!)
         .order("total_xp", { ascending: false })
         .limit(30);
@@ -116,7 +116,7 @@ export function useProfilesByIds(ids: string[]) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, username, total_xp, best_reps, battles, avatar_url")
+        .select("id, username, total_xp, best_reps, battles, avatar_url, verified")
         .in("id", ids);
       if (error) throw error;
       return data ?? [];
