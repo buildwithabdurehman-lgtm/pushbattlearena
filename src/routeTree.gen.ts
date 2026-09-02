@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedBattleRouteImport } from './routes/_authenticated/battle'
 import { Route as AuthenticatedChallengesRouteImport } from './routes/_authenticated/challenges'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
@@ -20,6 +21,7 @@ import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedRanksRouteImport } from './routes/_authenticated/ranks'
 import { Route as AuthenticatedResultsRouteImport } from './routes/_authenticated/results'
 import { Route as AuthenticatedDuelChallengeIdRouteImport } from './routes/_authenticated/duel.$challengeId'
+import { Route as AuthenticatedUUserIdRouteImport } from './routes/_authenticated/u.$userId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -34,6 +36,11 @@ const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedBattleRoute = AuthenticatedBattleRouteImport.update({
   id: '/battle',
@@ -77,10 +84,16 @@ const AuthenticatedDuelChallengeIdRoute =
     path: '/duel/$challengeId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedUUserIdRoute = AuthenticatedUUserIdRouteImport.update({
+  id: '/u/$userId',
+  path: '/u/$userId',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/battle': typeof AuthenticatedBattleRoute
   '/challenges': typeof AuthenticatedChallengesRoute
   '/home': typeof AuthenticatedHomeRoute
@@ -89,10 +102,12 @@ export interface FileRoutesByFullPath {
   '/ranks': typeof AuthenticatedRanksRoute
   '/results': typeof AuthenticatedResultsRoute
   '/duel/$challengeId': typeof AuthenticatedDuelChallengeIdRoute
+  '/u/$userId': typeof AuthenticatedUUserIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/battle': typeof AuthenticatedBattleRoute
   '/challenges': typeof AuthenticatedChallengesRoute
   '/home': typeof AuthenticatedHomeRoute
@@ -101,12 +116,14 @@ export interface FileRoutesByTo {
   '/ranks': typeof AuthenticatedRanksRoute
   '/results': typeof AuthenticatedResultsRoute
   '/duel/$challengeId': typeof AuthenticatedDuelChallengeIdRoute
+  '/u/$userId': typeof AuthenticatedUUserIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/battle': typeof AuthenticatedBattleRoute
   '/_authenticated/challenges': typeof AuthenticatedChallengesRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
@@ -115,12 +132,14 @@ export interface FileRoutesById {
   '/_authenticated/ranks': typeof AuthenticatedRanksRoute
   '/_authenticated/results': typeof AuthenticatedResultsRoute
   '/_authenticated/duel/$challengeId': typeof AuthenticatedDuelChallengeIdRoute
+  '/_authenticated/u/$userId': typeof AuthenticatedUUserIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/auth'
+    | '/admin'
     | '/battle'
     | '/challenges'
     | '/home'
@@ -129,10 +148,12 @@ export interface FileRouteTypes {
     | '/ranks'
     | '/results'
     | '/duel/$challengeId'
+    | '/u/$userId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/admin'
     | '/battle'
     | '/challenges'
     | '/home'
@@ -141,11 +162,13 @@ export interface FileRouteTypes {
     | '/ranks'
     | '/results'
     | '/duel/$challengeId'
+    | '/u/$userId'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/admin'
     | '/_authenticated/battle'
     | '/_authenticated/challenges'
     | '/_authenticated/home'
@@ -154,6 +177,7 @@ export interface FileRouteTypes {
     | '/_authenticated/ranks'
     | '/_authenticated/results'
     | '/_authenticated/duel/$challengeId'
+    | '/_authenticated/u/$userId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -184,6 +208,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/battle': {
       id: '/_authenticated/battle'
@@ -241,10 +272,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDuelChallengeIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/u/$userId': {
+      id: '/_authenticated/u/$userId'
+      path: '/u/$userId'
+      fullPath: '/u/$userId'
+      preLoaderRoute: typeof AuthenticatedUUserIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedBattleRoute: typeof AuthenticatedBattleRoute
   AuthenticatedChallengesRoute: typeof AuthenticatedChallengesRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
@@ -253,9 +292,11 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedRanksRoute: typeof AuthenticatedRanksRoute
   AuthenticatedResultsRoute: typeof AuthenticatedResultsRoute
   AuthenticatedDuelChallengeIdRoute: typeof AuthenticatedDuelChallengeIdRoute
+  AuthenticatedUUserIdRoute: typeof AuthenticatedUUserIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedBattleRoute: AuthenticatedBattleRoute,
   AuthenticatedChallengesRoute: AuthenticatedChallengesRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
@@ -264,6 +305,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedRanksRoute: AuthenticatedRanksRoute,
   AuthenticatedResultsRoute: AuthenticatedResultsRoute,
   AuthenticatedDuelChallengeIdRoute: AuthenticatedDuelChallengeIdRoute,
+  AuthenticatedUUserIdRoute: AuthenticatedUUserIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { VerifiedTick } from "@/components/VerifiedTick";
 import { Trophy } from "lucide-react";
 import { useSession } from "@/hooks/use-session";
 import { useLeaderboard } from "@/hooks/use-profile";
@@ -48,10 +49,15 @@ function LeaderboardPage() {
                 <RankBadge rank={rankForXp(entry.total_xp)} size="sm" className="h-8 w-8" />
               )}
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm">
-                  {entry.username}
-                  {isMe && <span className="ml-2 text-[10px] text-primary">YOU</span>}
-                </p>
+                <Link
+                  to="/u/$userId"
+                  params={{ userId: entry.id }}
+                  className="flex items-center gap-1.5 text-sm"
+                >
+                  <span className="truncate">{entry.username}</span>
+                  {entry.verified && <VerifiedTick className="h-3.5 w-3.5" />}
+                  {isMe && <span className="text-[10px] text-primary">YOU</span>}
+                </Link>
                 <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
                   {rankForXp(entry.total_xp).name} · PB {entry.best_reps}
                 </p>

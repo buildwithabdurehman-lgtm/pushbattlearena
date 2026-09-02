@@ -1,6 +1,6 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Swords, Check, X, Timer, Zap, Loader2 } from "lucide-react";
+import { Swords, Check, X, Timer, Zap, Loader2, Search } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/use-session";
@@ -15,6 +15,8 @@ import { findRandomMatch } from "@/lib/matchmaking";
 import { FighterAvatar } from "@/components/FighterAvatar";
 import { RankBadge } from "@/components/RankBadge";
 import { rankForXp } from "@/lib/game";
+import { useFighterSearch } from "@/hooks/use-profile";
+import { VerifiedTick } from "@/components/VerifiedTick";
 
 export const Route = createFileRoute("/_authenticated/challenges")({
   head: () => ({
@@ -47,6 +49,13 @@ function ChallengesPage() {
   const [duration, setDuration] = useState<number>(60);
   const [busy, setBusy] = useState<string | null>(null);
   const [searching, setSearching] = useState(false);
+  const [search, setSearch] = useState("");
+  const searchTerm = search.trim();
+  const { data: searchResults = [], isPending: searchPending } = useFighterSearch(
+    searchTerm,
+    user?.id,
+  );
+  const list = searchTerm.length > 0 ? searchResults : opponents;
   const { data: onlineCount = 0 } = useOnlineCount(user?.id);
 
   const ids = Array.from(
@@ -261,13 +270,28 @@ function ChallengesPage() {
             ))}
           </div>
         </div>
+        <div className="relative mt-3">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search fighters by name"
+            aria-label="Search fighters"
+            className="h-11 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-sm outline-none placeholder:text-muted-foreground focus:border-primary"
+          />
+        </div>
         <ul className="mt-3 space-y-2">
-          {opponents.length === 0 && (
+          {searchTerm.length > 0 && searchPending && (
+            <li className="text-xs text-muted-foreground">Searching…</li>
+          )}
+          {list.length === 0 && !(searchTerm.length > 0 && searchPending) && (
             <li className="text-xs text-muted-foreground">
-              No other fighters yet — invite a friend to install PushOff.
+              {searchTerm.length > 0
+                ? `No fighter matches “${searchTerm}”.`
+                : "No other fighters yet — invite a friend to install PushOff."}
             </li>
           )}
-          {opponents.map((p) => (
+          {list.map((p) => (
             <li
               key={p.id}
               className="flex items-center justify-between rounded-lg border border-border bg-background px-3 py-2"
@@ -276,7 +300,14 @@ function ChallengesPage() {
                 <FighterAvatar url={p.avatar_url} name={p.username} />
                 <RankBadge rank={rankForXp(p.total_xp)} size="sm" />
                 <div>
-                  <p className="font-display text-sm uppercase tracking-wide">{p.username}</p>
+                  <Link
+                    to="/u/$userId"
+                    params={{ userId: p.id }}
+                    className="flex items-center gap-1.5 font-display text-sm uppercase tracking-wide"
+                  >
+                    {p.username}
+                    {p.verified && <VerifiedTick className="h-3.5 w-3.5" />}
+                  </Link>
                   <p className="num-display text-[10px] text-muted-foreground">
                     {p.total_xp} XP · PB {p.best_reps}
                   </p>
