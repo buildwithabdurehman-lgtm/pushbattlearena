@@ -261,13 +261,28 @@ function ChallengesPage() {
             ))}
           </div>
         </div>
+        <div className="relative mt-3">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search fighters by name"
+            aria-label="Search fighters"
+            className="h-11 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-sm outline-none placeholder:text-muted-foreground focus:border-primary"
+          />
+        </div>
         <ul className="mt-3 space-y-2">
-          {opponents.length === 0 && (
+          {searchTerm.length > 0 && searchPending && (
+            <li className="text-xs text-muted-foreground">Searching…</li>
+          )}
+          {list.length === 0 && !(searchTerm.length > 0 && searchPending) && (
             <li className="text-xs text-muted-foreground">
-              No other fighters yet — invite a friend to install PushOff.
+              {searchTerm.length > 0
+                ? `No fighter matches “${searchTerm}”.`
+                : "No other fighters yet — invite a friend to install PushOff."}
             </li>
           )}
-          {opponents.map((p) => (
+          {list.map((p) => (
             <li
               key={p.id}
               className="flex items-center justify-between rounded-lg border border-border bg-background px-3 py-2"
