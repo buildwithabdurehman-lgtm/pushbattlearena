@@ -1,6 +1,6 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Swords, Check, X, Timer, Zap, Loader2 } from "lucide-react";
+import { Swords, Check, X, Timer, Zap, Loader2, Search } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/use-session";
@@ -15,6 +15,8 @@ import { findRandomMatch } from "@/lib/matchmaking";
 import { FighterAvatar } from "@/components/FighterAvatar";
 import { RankBadge } from "@/components/RankBadge";
 import { rankForXp } from "@/lib/game";
+import { useFighterSearch } from "@/hooks/use-profile";
+import { VerifiedTick } from "@/components/VerifiedTick";
 
 export const Route = createFileRoute("/_authenticated/challenges")({
   head: () => ({
@@ -47,6 +49,13 @@ function ChallengesPage() {
   const [duration, setDuration] = useState<number>(60);
   const [busy, setBusy] = useState<string | null>(null);
   const [searching, setSearching] = useState(false);
+  const [search, setSearch] = useState("");
+  const searchTerm = search.trim();
+  const { data: searchResults = [], isPending: searchPending } = useFighterSearch(
+    searchTerm,
+    user?.id,
+  );
+  const list = searchTerm.length > 0 ? searchResults : opponents;
   const { data: onlineCount = 0 } = useOnlineCount(user?.id);
 
   const ids = Array.from(
@@ -291,7 +300,14 @@ function ChallengesPage() {
                 <FighterAvatar url={p.avatar_url} name={p.username} />
                 <RankBadge rank={rankForXp(p.total_xp)} size="sm" />
                 <div>
-                  <p className="font-display text-sm uppercase tracking-wide">{p.username}</p>
+                  <Link
+                    to="/u/$userId"
+                    params={{ userId: p.id }}
+                    className="flex items-center gap-1.5 font-display text-sm uppercase tracking-wide"
+                  >
+                    {p.username}
+                    {p.verified && <VerifiedTick className="h-3.5 w-3.5" />}
+                  </Link>
                   <p className="num-display text-[10px] text-muted-foreground">
                     {p.total_xp} XP · PB {p.best_reps}
                   </p>
