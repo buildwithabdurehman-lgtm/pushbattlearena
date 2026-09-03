@@ -1,11 +1,17 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Camera, LogOut } from "lucide-react";
+import { BadgeCheck, Camera, LogOut, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/use-session";
-import { useProfile, useRecords } from "@/hooks/use-profile";
+import {
+  useIsAdmin,
+  useMyVerificationRequest,
+  useProfile,
+  useRecords,
+} from "@/hooks/use-profile";
+import { VerifiedTick } from "@/components/VerifiedTick";
 import { formatClock, rankProgress } from "@/lib/game";
 import { RankBadge } from "@/components/RankBadge";
 import { XpBar } from "@/components/XpBar";
@@ -60,6 +66,24 @@ function ProfilePage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { rank, next, percent, xpNeeded } = rankProgress(profile?.total_xp ?? 0);
+  const { data: isAdmin } = useIsAdmin();
+  const { data: verificationRequest } = useMyVerificationRequest(user?.id);
+  const [requesting, setRequesting] = useState(false);
+
+  async function requestVerification() {
+    if (!user) return;
+    setRequesting(true);
+    const { error } = await supabase
+      .from("verification_requests")
+      .insert({ user_id: user.id, note: null });
+    setRequesting(false);
+    if (error) {
+      toast.error("Could not send your verification request");
+      return;
+    }
+    await queryClient.invalidateQueries({ queryKey: ["my-verification", user.id] });
+    toast.success("Verification request sent for review");
+  }
 
   useEffect(() => {
     if (profile?.username) setUsername(profile.username);
@@ -137,7 +161,10 @@ function ProfilePage() {
           />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-xl font-display uppercase">{profile?.username ?? "…"}</p>
+          <p className="flex items-center gap-1.5 truncate text-xl font-display uppercase">
+            <span className="truncate">{profile?.username ?? "…"}</span>
+            {profile?.verified && <VerifiedTick className="h-5 w-5" />}
+          </p>
           <div className="mt-1 flex items-center gap-2">
             <RankBadge rank={rank} size="sm" className="h-7 w-7" />
             <p className="text-xs font-semibold uppercase tracking-widest text-primary">
@@ -163,6 +190,43 @@ function ProfilePage() {
           </div>
         ))}
       </section>
+
+      <section className="panel mt-4 p-4">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h2 className="text-sm uppercase tracking-widest">Verification</h2>
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              {profile?.verified
+                ? "You have the red tick on your profile."
+                : verificationRequest?.status === "pending"
+                  ? "Your request is waiting for admin review."
+                  : verificationRequest?.status === "rejected"
+                    ? "Your last request was declined — you can apply again."
+                    : "Apply for the red tick shown next to your fighter name."}
+            </p>
+          </div>
+          {profile?.verified ? (
+            <BadgeCheck className="h-8 w-8 shrink-0 text-primary" />
+          ) : (
+            <button
+              onClick={() => void requestVerification()}
+              disabled={requesting || verificationRequest?.status === "pending"}
+              className="shrink-0 rounded-lg bg-primary px-4 py-2.5 font-display text-[10px] uppercase tracking-widest text-primary-foreground active:scale-95 disabled:opacity-50"
+            >
+              {verificationRequest?.status === "pending" ? "Pending" : "Get verified"}
+            </button>
+          )}
+        </div>
+      </section>
+
+      {isAdmin && (
+        <Link
+          to="/admin"
+          className="mt-4 flex h-13 w-full items-center justify-center gap-2 rounded-xl border border-primary/50 bg-accent py-3.5 font-display text-sm uppercase tracking-widest text-primary"
+        >
+          <ShieldCheck className="h-4 w-4" /> Admin control
+        </Link>
+      )}
 
       <section className="mt-6">
         <h2 className="text-base">Fighter name</h2>
