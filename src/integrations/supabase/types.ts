@@ -73,6 +73,8 @@ export type Database = {
           avatar_url: string | null
           battles: number
           best_reps: number
+          country_changed_at: string | null
+          country_code: string | null
           created_at: string
           id: string
           last_seen_at: string
@@ -86,6 +88,8 @@ export type Database = {
           avatar_url?: string | null
           battles?: number
           best_reps?: number
+          country_changed_at?: string | null
+          country_code?: string | null
           created_at?: string
           id: string
           last_seen_at?: string
@@ -99,6 +103,8 @@ export type Database = {
           avatar_url?: string | null
           battles?: number
           best_reps?: number
+          country_changed_at?: string | null
+          country_code?: string | null
           created_at?: string
           id?: string
           last_seen_at?: string
@@ -197,6 +203,35 @@ export type Database = {
     }
     Functions: {
       claim_owner_admin: { Args: never; Returns: boolean }
+      country_leaderboard: {
+        Args: { _per_country?: number; _period?: string }
+        Returns: {
+          avatar_url: string
+          best_reps: number
+          country_code: string
+          country_position: number
+          reps: number
+          total_xp: number
+          user_id: string
+          username: string
+          verified: boolean
+          xp: number
+        }[]
+      }
+      global_leaderboard: {
+        Args: { _limit?: number; _period?: string }
+        Returns: {
+          avatar_url: string
+          best_reps: number
+          country_code: string
+          reps: number
+          total_xp: number
+          user_id: string
+          username: string
+          verified: boolean
+          xp: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -204,6 +239,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      period_start: { Args: { _period: string }; Returns: string }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
