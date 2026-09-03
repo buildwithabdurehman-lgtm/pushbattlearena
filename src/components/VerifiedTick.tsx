@@ -7,7 +7,6 @@ export function VerifiedTick({ className }: { className?: string }) {
     <BadgeCheck
       className={cn("inline-block shrink-0 text-primary", className ?? "h-4 w-4")}
       aria-label="Verified fighter"
-      title="Verified fighter"
     />
   );
 }
