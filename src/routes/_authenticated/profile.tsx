@@ -16,6 +16,9 @@ import { formatClock, rankProgress } from "@/lib/game";
 import { RankBadge } from "@/components/RankBadge";
 import { XpBar } from "@/components/XpBar";
 import { FighterAvatar } from "@/components/FighterAvatar";
+import { CountrySelect } from "@/components/CountrySelect";
+import { countryFlag, countryName } from "@/lib/countries";
+import { COUNTRY_COOLDOWN_DAYS, countryLockDaysLeft } from "@/hooks/use-leaderboards";
 
 const AVATAR_SIZE = 256;
 
