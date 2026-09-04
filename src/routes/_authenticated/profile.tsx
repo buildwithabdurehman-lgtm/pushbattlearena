@@ -72,6 +72,31 @@ function ProfilePage() {
   const { data: isAdmin } = useIsAdmin();
   const { data: verificationRequest } = useMyVerificationRequest(user?.id);
   const [requesting, setRequesting] = useState(false);
+  const [country, setCountry] = useState<string | null>(null);
+  const [editingCountry, setEditingCountry] = useState(false);
+  const [savingCountry, setSavingCountry] = useState(false);
+  const lockDays = countryLockDaysLeft(profile?.country_changed_at);
+
+  useEffect(() => {
+    if (profile?.country_code) setCountry(profile.country_code);
+  }, [profile?.country_code]);
+
+  async function saveCountry() {
+    if (!user || !country) return;
+    setSavingCountry(true);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ country_code: country })
+      .eq("id", user.id);
+    setSavingCountry(false);
+    if (error) {
+      toast.error(error.message.includes("30 days") ? error.message : "Could not change country");
+      return;
+    }
+    setEditingCountry(false);
+    await queryClient.invalidateQueries();
+    toast.success(`Now fighting for ${countryName(country)}`);
+  }
 
   async function requestVerification() {
     if (!user) return;
