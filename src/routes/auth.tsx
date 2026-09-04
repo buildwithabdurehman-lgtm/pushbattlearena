@@ -148,14 +148,27 @@ function AuthPage() {
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-3">
         {mode === "signup" && (
-          <Field
-            label="Fighter name"
-            value={username}
-            onChange={setUsername}
-            placeholder="ironfist"
-            autoComplete="nickname"
-          />
+          <>
+            <Field
+              label="Fighter name"
+              value={username}
+              onChange={setUsername}
+              placeholder="ironfist"
+              autoComplete="nickname"
+            />
+            <div>
+              <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                Country {country ? `· ${countryFlag(country)} ${countryName(country)}` : "(required)"}
+              </span>
+              <CountrySelect value={country} onChange={setCountry} className="mt-1.5" />
+              <p className="mt-1.5 text-[10px] text-muted-foreground">
+                Auto-suggested from your device — you can change it now, then only once every 30
+                days.
+              </p>
+            </div>
+          </>
         )}
+
         <Field
           label="Email"
           type="email"
