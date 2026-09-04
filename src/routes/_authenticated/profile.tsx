@@ -247,6 +247,54 @@ function ProfilePage() {
       </section>
 
       <section className="mt-6">
+        <h2 className="text-base">Country</h2>
+        <p className="mt-1 flex items-center gap-2 text-sm">
+          <span className="text-xl leading-none">{countryFlag(profile?.country_code)}</span>
+          <span className="font-display uppercase tracking-widest">
+            {countryName(profile?.country_code)}
+          </span>
+        </p>
+        {lockDays > 0 ? (
+          <p className="mt-2 text-[11px] text-muted-foreground">
+            You can switch country again in {lockDays} day{lockDays === 1 ? "" : "s"} — frequent
+            switching is blocked to keep national boards fair.
+          </p>
+        ) : editingCountry ? (
+          <>
+            <CountrySelect
+              value={country}
+              onChange={setCountry}
+              className="mt-3"
+              disabled={savingCountry}
+            />
+            <div className="mt-3 flex gap-2">
+              <button
+                onClick={() => void saveCountry()}
+                disabled={savingCountry || !country || country === profile?.country_code}
+                className="h-12 flex-1 rounded-lg bg-primary font-display text-xs uppercase tracking-widest text-primary-foreground disabled:opacity-60"
+              >
+                {savingCountry ? "Saving…" : "Save country"}
+              </button>
+              <button
+                onClick={() => setEditingCountry(false)}
+                className="h-12 rounded-lg border border-border px-4 font-display text-xs uppercase tracking-widest text-muted-foreground"
+              >
+                Cancel
+              </button>
+            </div>
+          </>
+        ) : (
+          <button
+            onClick={() => setEditingCountry(true)}
+            className="mt-3 h-12 w-full rounded-lg border border-border bg-card font-display text-xs uppercase tracking-widest text-muted-foreground"
+          >
+            Change country (once every {COUNTRY_COOLDOWN_DAYS} days)
+          </button>
+        )}
+      </section>
+
+
+      <section className="mt-6">
         <h2 className="text-base">Recent battles</h2>
         <ul className="panel mt-2 divide-y divide-border">
           {records?.map((record) => (
