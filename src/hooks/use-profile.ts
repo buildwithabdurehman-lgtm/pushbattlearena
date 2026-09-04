@@ -13,10 +13,12 @@ export type Profile = {
   battles: number;
   avatar_url: string | null;
   verified: boolean;
+  country_code: string | null;
+  country_changed_at: string | null;
 };
 
 export const PROFILE_COLUMNS =
-  "id, username, total_xp, best_reps, battles, avatar_url, verified";
+  "id, username, total_xp, best_reps, battles, avatar_url, verified, country_code, country_changed_at";
 
 export function profileQueryKey(userId: string | undefined) {
   return ["profile", userId] as const;

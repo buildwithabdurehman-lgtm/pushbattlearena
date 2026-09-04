@@ -4,6 +4,9 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useSession } from "@/hooks/use-session";
+import { CountrySelect } from "@/components/CountrySelect";
+import { PENDING_COUNTRY_KEY } from "@/components/CountryGate";
+import { countryFlag, countryName, guessCountryCode } from "@/lib/countries";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -25,6 +28,7 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
+  const [country, setCountry] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [sentConfirmation, setSentConfirmation] = useState(false);
   const { session, loading } = useSession();
@@ -34,17 +38,34 @@ function AuthPage() {
     if (!loading && session) void navigate({ to: "/home", replace: true });
   }, [loading, session, navigate]);
 
+  useEffect(() => {
+    setCountry((current) => current ?? guessCountryCode());
+  }, []);
+
+  /** Remembered so the country survives the email-confirmation round trip. */
+  function rememberCountry(code: string | null) {
+    if (code) window.localStorage.setItem(PENDING_COUNTRY_KEY, code);
+  }
+
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
+    if (mode === "signup" && !country) {
+      toast.error("Select the country you fight for");
+      return;
+    }
     setBusy(true);
     try {
       if (mode === "signup") {
+        rememberCountry(country);
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
             emailRedirectTo: window.location.origin,
-            data: { username: username.trim() || email.split("@")[0] },
+            data: {
+              username: username.trim() || email.split("@")[0],
+              country_code: country,
+            },
           },
         });
         if (error) throw error;
@@ -65,7 +86,9 @@ function AuthPage() {
 
   async function handleGoogle() {
     setBusy(true);
+    rememberCountry(country);
     const result = await lovable.auth.signInWithOAuth("google", {
+
       redirect_uri: window.location.origin,
     });
     if (result.error) {
@@ -125,14 +148,27 @@ function AuthPage() {
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-3">
         {mode === "signup" && (
-          <Field
-            label="Fighter name"
-            value={username}
-            onChange={setUsername}
-            placeholder="ironfist"
-            autoComplete="nickname"
-          />
+          <>
+            <Field
+              label="Fighter name"
+              value={username}
+              onChange={setUsername}
+              placeholder="ironfist"
+              autoComplete="nickname"
+            />
+            <div>
+              <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                Country {country ? `· ${countryFlag(country)} ${countryName(country)}` : "(required)"}
+              </span>
+              <CountrySelect value={country} onChange={setCountry} className="mt-1.5" />
+              <p className="mt-1.5 text-[10px] text-muted-foreground">
+                Auto-suggested from your device — you can change it now, then only once every 30
+                days.
+              </p>
+            </div>
+          </>
         )}
+
         <Field
           label="Email"
           type="email"
