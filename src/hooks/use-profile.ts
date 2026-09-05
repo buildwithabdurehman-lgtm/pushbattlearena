@@ -77,6 +77,24 @@ export function useFighterSearch(term: string, excludeId?: string | undefined) {
   });
 }
 
+/** All verified fighters, newest verification first. Admin panel roster. */
+export function useVerifiedFighters(enabled: boolean) {
+  return useQuery({
+    queryKey: ["verified-fighters"],
+    enabled,
+    queryFn: async (): Promise<Profile[]> => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select(PROFILE_COLUMNS)
+        .eq("verified", true)
+        .order("verified_at", { ascending: false })
+        .limit(200);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
 export type PushupRecord = {
   id: string;
   reps: number;
