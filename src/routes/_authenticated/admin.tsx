@@ -40,12 +40,14 @@ function AdminPage() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
+  const [editing, setEditing] = useState<Profile | null>(null);
 
   const term = search.trim();
   const { data: results = [] } = useFighterSearch(term);
   const { data: top = [] } = useLeaderboard(20);
   const { data: pending = [] } = usePendingVerifications(Boolean(isAdmin));
   const { data: requesters = [] } = useProfilesByIds(pending.map((r) => r.user_id));
+  const { data: verifiedFighters = [] } = useVerifiedFighters(Boolean(isAdmin));
 
   const list: Profile[] = term.length > 0 ? results : top;
 
