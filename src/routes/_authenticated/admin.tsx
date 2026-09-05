@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { BadgeCheck, Search, ShieldAlert, X } from "lucide-react";
+import { BadgeCheck, Pencil, Search, ShieldAlert, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/use-session";
@@ -10,11 +10,14 @@ import {
   useIsAdmin,
   useLeaderboard,
   usePendingVerifications,
+  useVerifiedFighters,
   type Profile,
 } from "@/hooks/use-profile";
 import { useProfilesByIds } from "@/hooks/use-challenges";
 import { FighterAvatar } from "@/components/FighterAvatar";
 import { VerifiedTick } from "@/components/VerifiedTick";
+import { CountrySelect } from "@/components/CountrySelect";
+import { countryFlag, countryName } from "@/lib/countries";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
