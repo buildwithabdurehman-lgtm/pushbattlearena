@@ -199,8 +199,17 @@ export class PushupDetector {
   /** Bottom / lockout thresholds, adapted to this fighter when possible. */
   private thresholds(): { down: number; up: number } {
     const range = this.learnedRange();
-    if (!this.calibrated) return { down: DOWN_ANGLE, up: UP_ANGLE };
     const top = this.angleMax;
+    if (!this.calibrated) {
+      // Very first rep: the personal bottom isn't known yet, so treat a clear
+      // bend away from the fighter's own lockout as the bottom. This makes the
+      // opening push-up count instead of being spent on calibration.
+      if (!Number.isFinite(top)) return { down: DOWN_ANGLE, up: UP_ANGLE };
+      return {
+        down: clamp(Math.min(DOWN_ANGLE, top - 25), 60, 140),
+        up: clamp(top - 10, 112, 176),
+      };
+    }
     const down = clamp(top - range * DOWN_FRACTION, 68, 128);
     const up = clamp(top - range * UP_FRACTION, 128, 174);
     return up - down >= 14 ? { down, up } : { down: DOWN_ANGLE, up: UP_ANGLE };
