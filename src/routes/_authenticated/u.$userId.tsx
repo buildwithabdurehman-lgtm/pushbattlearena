@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { ArrowLeft, Swords } from "lucide-react";
+import { ArrowLeft, Swords, UserPlus, UserCheck, MessageCircle } from "lucide-react";
+import { useFollowCounts, useIsFollowing, useToggleFollow } from "@/hooks/use-social";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/use-session";
@@ -34,6 +35,9 @@ function PublicProfilePage() {
   const navigate = useNavigate();
   const { data: profile, isPending } = useProfile(userId);
   const [busy, setBusy] = useState(false);
+  const counts = useFollowCounts(userId);
+  const { data: following = false } = useIsFollowing(user?.id, userId);
+  const toggle = useToggleFollow(user?.id, userId);
 
   const { rank, next, percent, xpNeeded } = rankProgress(profile?.total_xp ?? 0);
   const isMe = user?.id === userId;
@@ -109,6 +113,39 @@ function PublicProfilePage() {
               </div>
             ))}
           </section>
+
+          <section className="mt-3 grid grid-cols-2 gap-3">
+            <div className="panel p-3 text-center">
+              <p className="num-display text-xl">{counts.data?.followers ?? 0}</p>
+              <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Followers</p>
+            </div>
+            <div className="panel p-3 text-center">
+              <p className="num-display text-xl">{counts.data?.following ?? 0}</p>
+              <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Following</p>
+            </div>
+          </section>
+
+          {!isMe && (
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <button
+                onClick={() => toggle.mutate(following)}
+                disabled={toggle.isPending}
+                className={`flex h-12 items-center justify-center gap-2 rounded-xl font-display text-xs uppercase tracking-widest active:scale-95 disabled:opacity-60 ${
+                  following ? "panel text-foreground" : "border border-primary text-primary"
+                }`}
+              >
+                {following ? <UserCheck className="h-4 w-4" /> : <UserPlus className="h-4 w-4" />}
+                {following ? "Following" : "Follow"}
+              </button>
+              <Link
+                to="/chat/$userId"
+                params={{ userId }}
+                className="panel flex h-12 items-center justify-center gap-2 rounded-xl font-display text-xs uppercase tracking-widest"
+              >
+                <MessageCircle className="h-4 w-4" /> Message
+              </Link>
+            </div>
+          )}
 
           {!isMe && (
             <button
