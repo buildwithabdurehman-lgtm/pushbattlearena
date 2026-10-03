@@ -112,7 +112,7 @@ function GlobalBoard({ period }: { period: Period }) {
 
 function CountryBoard({ period }: { period: Period }) {
   const { user } = useSession();
-  const { data: profile, isPending: profilePending } = useProfile();
+  const { data: profile, isPending: profilePending } = useProfile(user?.id);
   const myCountry = profile?.country_code ?? null;
   const { data, isPending } = useCountryLeaderboard(period, 10);
 
