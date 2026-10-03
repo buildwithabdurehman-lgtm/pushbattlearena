@@ -20,6 +20,8 @@ import { Route as AuthenticatedLeaderboardRouteImport } from './routes/_authenti
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedRanksRouteImport } from './routes/_authenticated/ranks'
 import { Route as AuthenticatedResultsRouteImport } from './routes/_authenticated/results'
+import { Route as AuthenticatedSocialRouteImport } from './routes/_authenticated/social'
+import { Route as AuthenticatedChatUserIdRouteImport } from './routes/_authenticated/chat.$userId'
 import { Route as AuthenticatedDuelChallengeIdRouteImport } from './routes/_authenticated/duel.$challengeId'
 import { Route as AuthenticatedUUserIdRouteImport } from './routes/_authenticated/u.$userId'
 
@@ -78,6 +80,16 @@ const AuthenticatedResultsRoute = AuthenticatedResultsRouteImport.update({
   path: '/results',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSocialRoute = AuthenticatedSocialRouteImport.update({
+  id: '/social',
+  path: '/social',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedChatUserIdRoute = AuthenticatedChatUserIdRouteImport.update({
+  id: '/chat/$userId',
+  path: '/chat/$userId',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDuelChallengeIdRoute =
   AuthenticatedDuelChallengeIdRouteImport.update({
     id: '/duel/$challengeId',
@@ -101,6 +113,8 @@ export interface FileRoutesByFullPath {
   '/profile': typeof AuthenticatedProfileRoute
   '/ranks': typeof AuthenticatedRanksRoute
   '/results': typeof AuthenticatedResultsRoute
+  '/social': typeof AuthenticatedSocialRoute
+  '/chat/$userId': typeof AuthenticatedChatUserIdRoute
   '/duel/$challengeId': typeof AuthenticatedDuelChallengeIdRoute
   '/u/$userId': typeof AuthenticatedUUserIdRoute
 }
@@ -115,6 +129,8 @@ export interface FileRoutesByTo {
   '/profile': typeof AuthenticatedProfileRoute
   '/ranks': typeof AuthenticatedRanksRoute
   '/results': typeof AuthenticatedResultsRoute
+  '/social': typeof AuthenticatedSocialRoute
+  '/chat/$userId': typeof AuthenticatedChatUserIdRoute
   '/duel/$challengeId': typeof AuthenticatedDuelChallengeIdRoute
   '/u/$userId': typeof AuthenticatedUUserIdRoute
 }
@@ -131,6 +147,8 @@ export interface FileRoutesById {
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/ranks': typeof AuthenticatedRanksRoute
   '/_authenticated/results': typeof AuthenticatedResultsRoute
+  '/_authenticated/social': typeof AuthenticatedSocialRoute
+  '/_authenticated/chat/$userId': typeof AuthenticatedChatUserIdRoute
   '/_authenticated/duel/$challengeId': typeof AuthenticatedDuelChallengeIdRoute
   '/_authenticated/u/$userId': typeof AuthenticatedUUserIdRoute
 }
@@ -147,6 +165,8 @@ export interface FileRouteTypes {
     | '/profile'
     | '/ranks'
     | '/results'
+    | '/social'
+    | '/chat/$userId'
     | '/duel/$challengeId'
     | '/u/$userId'
   fileRoutesByTo: FileRoutesByTo
@@ -161,6 +181,8 @@ export interface FileRouteTypes {
     | '/profile'
     | '/ranks'
     | '/results'
+    | '/social'
+    | '/chat/$userId'
     | '/duel/$challengeId'
     | '/u/$userId'
   id:
@@ -176,6 +198,8 @@ export interface FileRouteTypes {
     | '/_authenticated/profile'
     | '/_authenticated/ranks'
     | '/_authenticated/results'
+    | '/_authenticated/social'
+    | '/_authenticated/chat/$userId'
     | '/_authenticated/duel/$challengeId'
     | '/_authenticated/u/$userId'
   fileRoutesById: FileRoutesById
@@ -265,6 +289,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedResultsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/social': {
+      id: '/_authenticated/social'
+      path: '/social'
+      fullPath: '/social'
+      preLoaderRoute: typeof AuthenticatedSocialRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/chat/$userId': {
+      id: '/_authenticated/chat/$userId'
+      path: '/chat/$userId'
+      fullPath: '/chat/$userId'
+      preLoaderRoute: typeof AuthenticatedChatUserIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/duel/$challengeId': {
       id: '/_authenticated/duel/$challengeId'
       path: '/duel/$challengeId'
@@ -291,6 +329,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedRanksRoute: typeof AuthenticatedRanksRoute
   AuthenticatedResultsRoute: typeof AuthenticatedResultsRoute
+  AuthenticatedSocialRoute: typeof AuthenticatedSocialRoute
+  AuthenticatedChatUserIdRoute: typeof AuthenticatedChatUserIdRoute
   AuthenticatedDuelChallengeIdRoute: typeof AuthenticatedDuelChallengeIdRoute
   AuthenticatedUUserIdRoute: typeof AuthenticatedUUserIdRoute
 }
@@ -304,6 +344,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedRanksRoute: AuthenticatedRanksRoute,
   AuthenticatedResultsRoute: AuthenticatedResultsRoute,
+  AuthenticatedSocialRoute: AuthenticatedSocialRoute,
+  AuthenticatedChatUserIdRoute: AuthenticatedChatUserIdRoute,
   AuthenticatedDuelChallengeIdRoute: AuthenticatedDuelChallengeIdRoute,
   AuthenticatedUUserIdRoute: AuthenticatedUUserIdRoute,
 }
