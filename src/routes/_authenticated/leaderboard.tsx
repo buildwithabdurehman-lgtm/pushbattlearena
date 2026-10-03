@@ -7,8 +7,8 @@ import { rankForXp } from "@/lib/game";
 import { RankBadge } from "@/components/RankBadge";
 import { FighterAvatar } from "@/components/FighterAvatar";
 import { countryFlag, countryName } from "@/lib/countries";
+import { useProfile } from "@/hooks/use-profile";
 import {
-  groupByCountry,
   PERIODS,
   PERIOD_LABEL,
   useCountryLeaderboard,
@@ -24,12 +24,12 @@ export const Route = createFileRoute("/_authenticated/leaderboard")({
       {
         name: "description",
         content:
-          "PushOff leaderboards: the global top 50 and the top 3 fighters in every country by verified push-ups.",
+          "PushOff leaderboards: the global top 50 and your country's top 10 fighters by verified push-ups.",
       },
       { property: "og:title", content: "Leaderboards — PushOff" },
       {
         property: "og:description",
-        content: "Global top 50 and country top 3 by verified push-ups.",
+        content: "Global top 50 and your country's top 10 by verified push-ups.",
       },
     ],
   }),
@@ -53,7 +53,7 @@ function LeaderboardPage() {
         {(
           [
             ["global", "Global Top 50"],
-            ["countries", "Countries Top 3"],
+            ["countries", "My Country Top 10"],
           ] as const
         ).map(([value, label]) => (
           <button
