@@ -112,52 +112,67 @@ function GlobalBoard({ period }: { period: Period }) {
 
 function CountryBoard({ period }: { period: Period }) {
   const { user } = useSession();
-  const { data, isPending } = useCountryLeaderboard(period, 3);
-  const groups = groupByCountry(data);
+  const { data: profile, isPending: profilePending } = useProfile();
+  const myCountry = profile?.country_code ?? null;
+  const { data, isPending } = useCountryLeaderboard(period, 10);
 
-  if (isPending) {
+  if (isPending || profilePending) {
     return (
       <p className="panel mt-4 px-4 py-6 text-center text-xs text-muted-foreground">
-        Loading nations…
+        Loading your nation…
       </p>
     );
   }
 
-  if (groups.length === 0) {
+  if (!myCountry) {
     return (
       <p className="panel mt-4 px-4 py-8 text-center text-xs text-muted-foreground">
-        No country has verified push-ups in this window yet.
+        Set your country on your profile to see your national leaderboard.
       </p>
+    );
+  }
+
+  const rows = (data ?? []).filter((row) => row.country_code === myCountry);
+
+  if (rows.length === 0) {
+    return (
+      <section className="panel mt-4 overflow-hidden">
+        <header className="flex items-center gap-2 border-b border-border px-4 py-2.5">
+          <span className="text-xl leading-none">{countryFlag(myCountry)}</span>
+          <h2 className="flex-1 truncate text-sm uppercase tracking-widest">
+            {countryName(myCountry)}
+          </h2>
+        </header>
+        <p className="px-4 py-8 text-center text-xs text-muted-foreground">
+          No verified push-ups from {countryName(myCountry)} in this window yet — go first.
+        </p>
+      </section>
     );
   }
 
   return (
-    <div className="mt-4 space-y-4 pb-2">
-      {groups.map(([code, rows]) => (
-        <section key={code} className="panel overflow-hidden">
-          <header className="flex items-center gap-2 border-b border-border px-4 py-2.5">
-            <span className="text-xl leading-none">{countryFlag(code)}</span>
-            <h2 className="flex-1 truncate text-sm uppercase tracking-widest">
-              {countryName(code)}
-            </h2>
-            <span className="num-display text-xs text-primary">
-              {rows.reduce((sum, r) => sum + r.reps, 0).toLocaleString()}
-            </span>
-          </header>
-          <ul className="divide-y divide-border">
-            {rows.map((row) => (
-              <Row
-                key={row.user_id}
-                entry={row}
-                position={row.country_position}
-                isMe={row.user_id === user?.id}
-                hideFlag
-              />
-            ))}
-          </ul>
-        </section>
-      ))}
-    </div>
+    <section className="panel mt-4 overflow-hidden">
+      <header className="flex items-center gap-2 border-b border-border px-4 py-2.5">
+        <span className="text-xl leading-none">{countryFlag(myCountry)}</span>
+        <h2 className="flex-1 truncate text-sm uppercase tracking-widest">
+          {countryName(myCountry)} Top 10
+        </h2>
+        <span className="num-display text-xs text-primary">
+          {rows.reduce((sum, r) => sum + r.reps, 0).toLocaleString()}
+        </span>
+      </header>
+      <ul className="divide-y divide-border">
+        {rows.map((row) => (
+          <Row
+            key={row.user_id}
+            entry={row}
+            position={row.country_position}
+            isMe={row.user_id === user?.id}
+            hideFlag
+          />
+        ))}
+      </ul>
+    </section>
   );
 }
 
