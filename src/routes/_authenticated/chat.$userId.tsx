@@ -34,7 +34,9 @@ function ChatPage() {
   const [sending, setSending] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => endRef.current?.scrollIntoView({ block: "end" }), [msgs?.length]);
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ block: "end" });
+  }, [msgs?.length]);
 
   async function send(e: React.FormEvent) {
     e.preventDefault();
