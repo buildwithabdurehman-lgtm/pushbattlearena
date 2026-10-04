@@ -163,7 +163,9 @@ function useMessagesRealtime(me: string | undefined, onChange: () => void) {
       .channel(`messages-${me}-${Math.random().toString(36).slice(2)}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, onChange)
       .subscribe();
-    return () => void supabase.removeChannel(ch);
+    return () => {
+      void supabase.removeChannel(ch);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [me]);
 }
