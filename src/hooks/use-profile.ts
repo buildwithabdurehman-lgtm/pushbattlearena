@@ -48,7 +48,6 @@ export function profileQueryKey(userId: string | undefined) {
 }
 
 export function useProfile(userId: string | undefined) {
-  const { user } = useSession();
   return useQuery({
     queryKey: profileQueryKey(userId),
     enabled: Boolean(userId),
@@ -61,7 +60,8 @@ export function useProfile(userId: string | undefined) {
       if (error) throw error;
       if (!data) return null;
       let priv: Partial<Profile> = EMPTY_PRIVATE;
-      if (user?.id === userId) {
+      const { data: auth } = await supabase.auth.getSession();
+      if (auth.session?.user.id === userId) {
         const { data: mine } = await supabase.rpc("get_my_private_profile");
         if (mine && mine[0]) priv = { ...EMPTY_PRIVATE, ...mine[0] };
       }
