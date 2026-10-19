@@ -23,11 +23,10 @@ export function useFollowCounts(userId: string | undefined) {
     queryKey: ["follow-counts", userId],
     enabled: !!userId,
     queryFn: async () => {
-      const [a, b] = await Promise.all([
-        supabase.from("follows").select("*", { count: "exact", head: true }).eq("following_id", userId!),
-        supabase.from("follows").select("*", { count: "exact", head: true }).eq("follower_id", userId!),
-      ]);
-      return { followers: a.count ?? 0, following: b.count ?? 0 };
+      const { data, error } = await supabase.rpc("follow_counts", { _user_id: userId! });
+      if (error) throw error;
+      const row = data?.[0];
+      return { followers: Number(row?.followers ?? 0), following: Number(row?.following ?? 0) };
     },
   });
 }

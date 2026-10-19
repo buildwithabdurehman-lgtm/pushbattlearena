@@ -293,6 +293,27 @@ export type Database = {
           xp: number
         }[]
       }
+      follow_counts: {
+        Args: { _user_id: string }
+        Returns: {
+          followers: number
+          following: number
+        }[]
+      }
+      get_my_private_profile: {
+        Args: never
+        Returns: {
+          activity_level: string
+          age: number
+          equipment: string
+          gender: string
+          goal: string
+          height_cm: number
+          session_minutes: number
+          training_days: number
+          weight_kg: number
+        }[]
+      }
       global_leaderboard: {
         Args: { _limit?: number; _period?: string }
         Returns: {

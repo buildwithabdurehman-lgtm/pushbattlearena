@@ -15,26 +15,40 @@ export type Profile = {
   verified: boolean;
   country_code: string | null;
   country_changed_at: string | null;
-  gender: string | null;
-  age: number | null;
-  height_cm: number | null;
-  weight_kg: number | null;
-  activity_level: string | null;
-  goal: string | null;
-  training_days: number | null;
-  equipment: string | null;
-  session_minutes: number | null;
+  gender?: string | null;
+  age?: number | null;
+  height_cm?: number | null;
+  weight_kg?: number | null;
+  activity_level?: string | null;
+  goal?: string | null;
+  training_days?: number | null;
+  equipment?: string | null;
+  session_minutes?: number | null;
   onboarded_at: string | null;
 };
 
+/** Columns any signed-in fighter may read. Body/onboarding details are private. */
 export const PROFILE_COLUMNS =
-  "id, username, total_xp, best_reps, battles, avatar_url, verified, country_code, country_changed_at, gender, age, height_cm, weight_kg, activity_level, goal, training_days, equipment, session_minutes, onboarded_at";
+  "id, username, total_xp, best_reps, battles, avatar_url, verified, country_code, country_changed_at, onboarded_at";
+
+const EMPTY_PRIVATE = {
+  gender: null,
+  age: null,
+  height_cm: null,
+  weight_kg: null,
+  activity_level: null,
+  goal: null,
+  training_days: null,
+  equipment: null,
+  session_minutes: null,
+};
 
 export function profileQueryKey(userId: string | undefined) {
   return ["profile", userId] as const;
 }
 
 export function useProfile(userId: string | undefined) {
+  const { user } = useSession();
   return useQuery({
     queryKey: profileQueryKey(userId),
     enabled: Boolean(userId),
@@ -45,7 +59,13 @@ export function useProfile(userId: string | undefined) {
         .eq("id", userId!)
         .maybeSingle();
       if (error) throw error;
-      return data;
+      if (!data) return null;
+      let priv: Partial<Profile> = EMPTY_PRIVATE;
+      if (user?.id === userId) {
+        const { data: mine } = await supabase.rpc("get_my_private_profile");
+        if (mine && mine[0]) priv = { ...EMPTY_PRIVATE, ...mine[0] };
+      }
+      return { ...data, ...priv } as Profile;
     },
   });
 }
