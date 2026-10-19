@@ -15,15 +15,15 @@ export type Profile = {
   verified: boolean;
   country_code: string | null;
   country_changed_at: string | null;
-  gender: string | null;
-  age: number | null;
-  height_cm: number | null;
-  weight_kg: number | null;
-  activity_level: string | null;
-  goal: string | null;
-  training_days: number | null;
-  equipment: string | null;
-  session_minutes: number | null;
+  gender?: string | null;
+  age?: number | null;
+  height_cm?: number | null;
+  weight_kg?: number | null;
+  activity_level?: string | null;
+  goal?: string | null;
+  training_days?: number | null;
+  equipment?: string | null;
+  session_minutes?: number | null;
   onboarded_at: string | null;
 };
 
@@ -60,7 +60,7 @@ export function useProfile(userId: string | undefined) {
         .maybeSingle();
       if (error) throw error;
       if (!data) return null;
-      let priv = EMPTY_PRIVATE;
+      let priv: Partial<Profile> = EMPTY_PRIVATE;
       if (user?.id === userId) {
         const { data: mine } = await supabase.rpc("get_my_private_profile");
         if (mine && mine[0]) priv = { ...EMPTY_PRIVATE, ...mine[0] };
