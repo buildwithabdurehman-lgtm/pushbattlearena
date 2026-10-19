@@ -15,10 +15,20 @@ export type Profile = {
   verified: boolean;
   country_code: string | null;
   country_changed_at: string | null;
+  gender: string | null;
+  age: number | null;
+  height_cm: number | null;
+  weight_kg: number | null;
+  activity_level: string | null;
+  goal: string | null;
+  training_days: number | null;
+  equipment: string | null;
+  session_minutes: number | null;
+  onboarded_at: string | null;
 };
 
 export const PROFILE_COLUMNS =
-  "id, username, total_xp, best_reps, battles, avatar_url, verified, country_code, country_changed_at";
+  "id, username, total_xp, best_reps, battles, avatar_url, verified, country_code, country_changed_at, gender, age, height_cm, weight_kg, activity_level, goal, training_days, equipment, session_minutes, onboarded_at";
 
 export function profileQueryKey(userId: string | undefined) {
   return ["profile", userId] as const;

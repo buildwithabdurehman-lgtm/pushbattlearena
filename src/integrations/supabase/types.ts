@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.17"
   }
   public: {
     Tables: {
@@ -115,49 +115,79 @@ export type Database = {
       }
       profiles: {
         Row: {
+          activity_level: string | null
+          age: number | null
           avatar_url: string | null
           battles: number
           best_reps: number
           country_changed_at: string | null
           country_code: string | null
           created_at: string
+          equipment: string | null
+          gender: string | null
+          goal: string | null
+          height_cm: number | null
           id: string
           last_seen_at: string
+          onboarded_at: string | null
+          session_minutes: number | null
           total_xp: number
+          training_days: number | null
           updated_at: string
           username: string
           verified: boolean
           verified_at: string | null
+          weight_kg: number | null
         }
         Insert: {
+          activity_level?: string | null
+          age?: number | null
           avatar_url?: string | null
           battles?: number
           best_reps?: number
           country_changed_at?: string | null
           country_code?: string | null
           created_at?: string
+          equipment?: string | null
+          gender?: string | null
+          goal?: string | null
+          height_cm?: number | null
           id: string
           last_seen_at?: string
+          onboarded_at?: string | null
+          session_minutes?: number | null
           total_xp?: number
+          training_days?: number | null
           updated_at?: string
           username: string
           verified?: boolean
           verified_at?: string | null
+          weight_kg?: number | null
         }
         Update: {
+          activity_level?: string | null
+          age?: number | null
           avatar_url?: string | null
           battles?: number
           best_reps?: number
           country_changed_at?: string | null
           country_code?: string | null
           created_at?: string
+          equipment?: string | null
+          gender?: string | null
+          goal?: string | null
+          height_cm?: number | null
           id?: string
           last_seen_at?: string
+          onboarded_at?: string | null
+          session_minutes?: number | null
           total_xp?: number
+          training_days?: number | null
           updated_at?: string
           username?: string
           verified?: boolean
           verified_at?: string | null
+          weight_kg?: number | null
         }
         Relationships: []
       }
